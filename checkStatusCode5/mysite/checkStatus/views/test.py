@@ -129,6 +129,9 @@ def nameTest(request):
             PingTestPage.objects.create(pingTest = idPingTest, page = page, status = statusCode, loadingTime = roundTrip)
             count += 1
 
+    result = round((countSuccess/ count)*100)
+    PingTest.objects.filter(id = idPingTest.id).update(percentSuccess = result)
+    
     return HttpResponse('ok')
 
     
