@@ -92,45 +92,39 @@ def nameTest(request):
     # result = round((countSuccess/ count)*100)
     # PingTest.objects.filter(id = idPingTest.id).update(percentSuccess = result)
 
+    def checkStatus(pages):
+
+        countSuccess = 0
+        count = 0
+        for page in pages:
+            response = requests.get(page.link)
+            statusCode = response.status_code
+            roundTrip = response.elapsed.total_seconds()
+            
+            if roundTrip <= 3 and statusCode in range(200, 300):
+                countSuccess += 1
+
+            PingTestPage.objects.create(pingTest = idPingTest, page = page, status = statusCode, loadingTime = roundTrip)
+            count += 1
+
+        result = round((countSuccess/ count)*100)
+        PingTest.objects.filter(id = idPingTest.id).update(percentSuccess = result)
+        
+
+
     data = request.data
     idTest = Test.objects.get(name = data['name'])
 
     idPingTest = PingTest.objects.create(test = idTest)
 
-
-    countSuccess = 0
-    count = 0
-
     pages = Page.objects.filter(pageType__test=idTest)
     if data['onlyMain'] == True:
         pages = pages.exclude(isMain=False)
-
-        for page in pages:
-            response = requests.get(page.link)
-            statusCode = response.status_code
-            roundTrip = response.elapsed.total_seconds()
-            
-            if roundTrip <= 3 and statusCode in range(200, 300):
-                countSuccess += 1
-
-            PingTestPage.objects.create(pingTest = idPingTest, page = page, status = statusCode, loadingTime = roundTrip)
-            count += 1
-
+        checkStatus(pages)
 
     else:
-        for page in pages:
-            response = requests.get(page.link)
-            statusCode = response.status_code
-            roundTrip = response.elapsed.total_seconds()
-            
-            if roundTrip <= 3 and statusCode in range(200, 300):
-                countSuccess += 1
+        checkStatus(pages)
 
-            PingTestPage.objects.create(pingTest = idPingTest, page = page, status = statusCode, loadingTime = roundTrip)
-            count += 1
-
-    result = round((countSuccess/ count)*100)
-    PingTest.objects.filter(id = idPingTest.id).update(percentSuccess = result)
     
     return HttpResponse('ok')
 
