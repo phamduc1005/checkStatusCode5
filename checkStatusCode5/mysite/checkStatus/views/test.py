@@ -118,11 +118,8 @@ def nameTest(request):
     idPingTest = PingTest.objects.create(test = idTest)
 
     pages = Page.objects.filter(pageType__test=idTest)
-    if data['onlyMain'] == True:
+    if data['onlyMain']:
         pages = pages.exclude(isMain=False)
-        checkStatus(pages)
-
-    else:
         checkStatus(pages)
 
     
