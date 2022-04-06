@@ -13,116 +13,43 @@ from checkStatus.models.page import Page
 
 
 
-@api_view(['POST'])
-def nameTest(request):
-
-    # # data=request.data
-
-    # # newTest = Test.objects.create(name= data['name'])
-    # # newPageType = newTest.testType.create(type = data['type'])
+def checkStatus(page):
+    response = requests.get(page.link)
+    statusCode = response.status_code
+    waitingTime = response.elapsed.total_seconds()
     
-    # # newPingTest = newTest.testPing.create()
-    # # count = len(data['testLink'])
-
-    # # for element in data['testLink']:
-    # #     if element['isMain'] == True:
-    # #         newPage = newPageType.testLink.create(link = element['link'], isMain = element['isMain'])
-
-    # #         response =requests.get(element['link'])
-    # #         statusCode = response.status_code
-    # #         roundTrip = response.elapsed.total_seconds()
-
-    # #         PingTestPage.objects.create(pingTest = newPingTest, page = newPage, status = statusCode, loadingTime = roundTrip)
-            
-    # #         if roundTrip <= 3 and statusCode in range(200, 300):
-    # #             newTest.testPing.update(percentSuccess = 100)
+    return statusCode, waitingTime
 
 
+def checkStatusAllPages(pages, pingTest):
+    calculateSuccess = 0
+    sum = 0
 
+    for page in pages:
+        statusCode, waitingTime = checkStatus(page)
+        PingTestPage.objects.create(pingTest = pingTest, page = page, status = statusCode, loadingTime = waitingTime)
+        if waitingTime <= 3 and statusCode in range(200, 300):
+            calculateSuccess += 1
+        sum += 1
 
-    # data = request.data
-    # idTest = Test.objects.get(name = data['name'])
-
-    # idPingTest = PingTest.objects.create(test = idTest)
-
-    # listTypePage = PageType.objects.filter(test = idTest)
+    rate = round((calculateSuccess/ sum)*100)
+    PingTest.objects.filter(id = pingTest.id).update(percentSuccess = rate)
 
 
 
-    # countSuccess = 0
-    # count = 0
-
-    # listTypePageTrue = []
-
-
-    # for element in listTypePage:
-    #     listPageTrue = Page.objects.filter(pageType = element, isMain = True)
-        
-    #     for pageTrue in listPageTrue:
-    #         listTypePageTrue.append(element.id)
-
-    #         response = requests.get(pageTrue.link)
-    #         statusCode = response.status_code
-    #         roundTrip = response.elapsed.total_seconds()
-            
-    #         if roundTrip <= 3 and statusCode in range(200, 300):
-    #             countSuccess += 1
-            
-    #         PingTestPage.objects.create(pingTest = idPingTest, page = pageTrue, status = statusCode, loadingTime = roundTrip)
-    #         count += 1
-            
-        
-
-    # listTypePageFalse = PageType.objects.filter(test=idTest).exclude(id__in=listTypePageTrue)
-    # for elementFalse in listTypePageFalse:
-    #     listPageFalse = Page.objects.filter(pageType = elementFalse, isMain = False)
-
-    #     for pageFalse in listPageFalse:
-    #         response = requests.get(pageFalse.link)
-    #         statusCode = response.status_code
-    #         roundTrip = response.elapsed.total_seconds()
-            
-    #         if roundTrip <= 3 and statusCode in range(200, 300):
-    #             countSuccess += 1
-
-    #         PingTestPage.objects.create(pingTest = idPingTest, page = pageFalse, status = statusCode, loadingTime = roundTrip)
-    #         count += 1
-
-
-    # result = round((countSuccess/ count)*100)
-    # PingTest.objects.filter(id = idPingTest.id).update(percentSuccess = result)
-
-    def checkStatus(pages):
-
-        countSuccess = 0
-        count = 0
-        for page in pages:
-            response = requests.get(page.link)
-            statusCode = response.status_code
-            roundTrip = response.elapsed.total_seconds()
-            
-            if roundTrip <= 3 and statusCode in range(200, 300):
-                countSuccess += 1
-
-            PingTestPage.objects.create(pingTest = idPingTest, page = page, status = statusCode, loadingTime = roundTrip)
-            count += 1
-
-        result = round((countSuccess/ count)*100)
-        PingTest.objects.filter(id = idPingTest.id).update(percentSuccess = result)
-        
-
-
+@api_view(['POST'])
+def checkStatusCode(request):
     data = request.data
-    idTest = Test.objects.get(name = data['name'])
+    test = Test.objects.get(name = data['name'])
 
-    idPingTest = PingTest.objects.create(test = idTest)
+    pingTest = PingTest.objects.create(test = test)
 
-    pages = Page.objects.filter(pageType__test=idTest)
-    if data['onlyMain'] == True:
+    pages = Page.objects.filter(pageType__test=test)
+    if data['onlyMain']:
         pages = pages.exclude(isMain=False)
-   
-    checkStatus(pages)
 
+    checkStatusAllPages(pages, pingTest)
+    
 
     return HttpResponse('ok')
 
