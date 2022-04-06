@@ -1,12 +1,7 @@
-from django.http import HttpResponse, JsonResponse
+from django.http import HttpResponse
 from rest_framework.decorators import api_view
-from rest_framework.response import Response
 import requests
 from checkStatus.models.test import Test
-from checkStatus.serializers.test_serializer import TestSerializer
-from rest_framework import status
-
-from checkStatus.models.page_type import PageType
 from checkStatus.models.ping_test import PingTest
 from checkStatus.models.ping_test_page import PingTestPage
 from checkStatus.models.page import Page
