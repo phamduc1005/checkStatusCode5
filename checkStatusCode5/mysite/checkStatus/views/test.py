@@ -11,24 +11,22 @@ from checkStatus.models.page import Page
 def checkStatus(page):
     response = requests.get(page.link)
     statusCode = response.status_code
-    waitingTime = response.elapsed.total_seconds()
+    loadingTime = response.elapsed.total_seconds()
     
-    return statusCode, waitingTime
-
+    return statusCode, loadingTime
 
 def checkStatusAllPages(pages, pingTest):
-    calculateSuccess = 0
-    sum = 0
+    nbSuccess = 0
 
     for page in pages:
-        statusCode, waitingTime = checkStatus(page)
-        PingTestPage.objects.create(pingTest = pingTest, page = page, status = statusCode, loadingTime = waitingTime)
-        if waitingTime <= 3 and statusCode in range(200, 300):
-            calculateSuccess += 1
-        sum += 1
+        statusCode, loadingTime = checkStatus(page)
+        PingTestPage.objects.create(pingTest = pingTest, page = page, status = statusCode, loadingTime = loadingTime)
+        if loadingTime <= 3 and statusCode in range(200, 300):
+            nbSuccess += 1
 
-    rate = round((calculateSuccess/ sum)*100)
-    PingTest.objects.filter(id = pingTest.id).update(percentSuccess = rate)
+    rate = round((nbSuccess/ len(pages))*100)
+    pingTest.percentSuccess = rate
+    pingTest.save()
 
 
 
