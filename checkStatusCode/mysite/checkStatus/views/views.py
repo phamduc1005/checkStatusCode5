@@ -84,11 +84,11 @@ def checksAllUrlOfAWeb(request, nameTest):
     
     for element in pageTypes:
         pages = Page.objects.filter(pageType=element)
-        for i in pages:
-            pingTestPage = PingTestPage.objects.get(page=i, pingTest=pingTest)
+        for page in pages:
+            pingTestPage = PingTestPage.objects.get(page=page, pingTest=pingTest)
 
             data = {
-                'url' : i.link,
+                'url' : page.link,
                 'status' : pingTestPage.status,
                 'loadingTime' : pingTestPage.loadingTime
             }
