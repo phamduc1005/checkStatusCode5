@@ -12,6 +12,8 @@ from checkStatus.models.page_type import PageType
 from checkStatus.models.ping_test import PingTest
 from checkStatus.models.ping_test_page import PingTestPage
 from checkStatus.models.page import Page
+from operator import itemgetter
+
 
 def checkStatus(page):
     response = requests.get(page.link)
@@ -95,5 +97,6 @@ def checksAllUrlOfAWeb(request, nameTest):
 
             listData.append(data)
 
+    sortListData = sorted(listData, key=itemgetter('status'), reverse=True)
     return Response(listData)
     
