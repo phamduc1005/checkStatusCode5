@@ -83,7 +83,7 @@ def checksAllUrlOfAWeb(request, nameTest):
     pingTest = PingTest.objects.filter(test=test).last()
     
     for element in pageTypes:
-        pages = Page.objects.filter(pageType=element)
+        pages = Page.objects.filter(pageType=element).exclude(isMain=False)
         for page in pages:
             pingTestPage = PingTestPage.objects.get(page=page, pingTest=pingTest)
 
