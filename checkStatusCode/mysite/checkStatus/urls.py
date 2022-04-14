@@ -1,8 +1,11 @@
-from checkStatus.views import views
+from checkStatus.views import post_check_status
+from checkStatus.views import get_ping_test_page
+from checkStatus.views import get_ping_test
+
 from django.urls import path
 
 urlpatterns = [
-    path('check', views.checkStatusCode, name='checkStatusCode'),
-    path('checkLastUrlAll/', views.checkLastUrlAll, name='checkLastUrlAll'),
-    path('allChecksOfAWebsite/<str:nameTest>/', views.checksAllUrlOfAWeb, name='allChecksOfACebsite'),
+    path('check', post_check_status.checkStatusCode, name='checkStatusCode'),
+    path('checkLastUrlAll/', get_ping_test.checkLastUrlAll, name='checkLastUrlAll'),
+    path('allCheckOfAWebsite/<str:testName>/', get_ping_test_page.checkAllUrlOfAWeb, name='allCheckOfAWebsite'),
 ]
