@@ -13,7 +13,7 @@ def checkAllUrlOfAWeb(request, testName):
     
     pingTest = PingTest.objects.filter(test=test).last()
     
-    pingTestsPage = PingTestPage.objects.filter(pingTest=pingTest).order_by('-status')
-    serializer = PingTestPageSerializer(pingTestsPage, many=True)
+    pingTestPages = PingTestPage.objects.filter(pingTest=pingTest).order_by('-status')
+    serializer = PingTestPageSerializer(pingTestPages, many=True)
     
     return Response(serializer.data)
